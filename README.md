@@ -1,66 +1,65 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sembark URL Shortener
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A small multi-company URL shortener built with Laravel 10. The application has three roles: SuperAdmin, Admin and Member.
 
-## About Laravel
+## Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.1+
+- Composer
+- MySQL/MariaDB or SQLite
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Clone the repository and enter the project directory.
+2. Run `composer install`.
+3. Copy `.env.example` to `.env` and configure the database.
+4. Run `php artisan key:generate`.
+5. Run `php artisan migrate --seed`.
+6. Start the application with `php artisan serve`.
 
-## Learning Laravel
+The seed creates the initial SuperAdmin account. For local development, check `database/seeders/SuperAdminSeeder.php` and change the seeded credentials before using the application outside a local environment.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Roles and permissions
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**SuperAdmin** can create companies, invite the first Admin for a company and view short URLs from every company. SuperAdmin cannot create short URLs.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Admin** belongs to one company. An Admin can invite another Admin or Member into that same company, create short URLs and view all short URLs created inside the company.
 
-## Laravel Sponsors
+**Member** belongs to one company. A Member can create short URLs and can only view URLs that they created.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Invitation flow
 
-### Premium Partners
+Invitations contain the company, invited email, role, inviter, a random token and an expiry time. The invitation acceptance page is public because the invited person does not have an account yet. On acceptance, the user is created in the invitation's company and the invitation is marked as accepted.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+For this coding exercise the generated invitation URL is displayed after an invitation is created. A production application could send the same link through email.
 
-## Contributing
+## Short URLs
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Admin and Member users can submit a valid original URL. The application generates a unique seven-character code. Public URLs use `/s/{shortCode}` and redirect to the stored original URL.
 
-## Code of Conduct
+## Tests
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The feature tests cover company/admin invitation, invitation acceptance, Admin invitations, URL creation permissions, role-based URL visibility and public redirects.
 
-## Security Vulnerabilities
+Run:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan test
+```
 
-## License
+The test environment uses an in-memory SQLite database as configured in `phpunit.xml`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Main files
+
+- `app/Http/Controllers/SuperAdmin/CompanyController.php`
+- `app/Http/Controllers/SuperAdmin/InvitationController.php`
+- `app/Http/Controllers/Admin/InvitationController.php`
+- `app/Http/Controllers/InvitationAcceptController.php`
+- `app/Http/Controllers/ShortUrlController.php`
+- `app/Http/Middleware/RoleMiddleware.php`
+- `routes/web.php`
+- `tests/Feature/UrlShortenerTest.php`
+
+## AI tool disclosure
+
+AI assistance was used for syntax guidance, debugging support and reviewing implementation ideas. The project structure, implementation decisions and final code were reviewed and tested as part of the development process.

@@ -19,6 +19,10 @@
         <p>{{ session('success') }}</p>
     @endif
 
+    @if (session('invitation_url'))
+        <p>Invitation link: <a href="{{ session('invitation_url') }}">{{ session('invitation_url') }}</a></p>
+    @endif
+
     @if ($errors->any())
         <ul>
             @foreach ($errors->all() as $error)

@@ -9,6 +9,10 @@
 
     <h1>Login</h1>
 
+    @if (session('success'))
+        <p>{{ session('success') }}</p>
+    @endif
+
     @if ($errors->any())
         <div>
             @foreach ($errors->all() as $error)

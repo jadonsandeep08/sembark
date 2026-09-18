@@ -1,40 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\SuperAdmin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\Invitation;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class InvitationController extends Controller
 {
-    /**
-     * Show the Admin invitation form.
-     */
     public function create()
     {
-        $companies = Company::orderBy('name')->get();
-
-        return view('superadmin.invitations.create', compact('companies'));
+        return view('admin.invitations.create');
     }
 
-    /**
-     * Store an Admin invitation.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'company_id' => [
-                'required',
-                'exists:companies,id',
-            ],
-            'email' => [
-                'required',
-                'email',
-            ],
+            'email' => ['required', 'email'],
+            'role' => ['required', Rule::in(['admin', 'member'])],
         ]);
 
         if (User::where('email', $validated['email'])->exists()) {
@@ -42,22 +28,22 @@ class InvitationController extends Controller
         }
 
         Invitation::where('email', $validated['email'])
-            ->where('company_id', $validated['company_id'])
+            ->where('company_id', $request->user()->company_id)
             ->whereNull('accepted_at')
             ->delete();
 
         $invitation = Invitation::create([
-            'company_id' => $validated['company_id'],
-            'invited_by' => auth()->id(),
+            'company_id' => $request->user()->company_id,
+            'invited_by' => $request->user()->id,
             'email' => $validated['email'],
-            'role' => 'admin',
+            'role' => $validated['role'],
             'token' => Str::random(64),
             'expires_at' => now()->addDays(2),
         ]);
 
         return redirect()
-            ->route('superadmin.invitations.create')
-            ->with('success', 'Admin invitation created successfully.')
+            ->route('admin.invitations.create')
+            ->with('success', 'Invitation created successfully.')
             ->with('invitation_url', route('invitations.show', $invitation->token));
     }
 }
